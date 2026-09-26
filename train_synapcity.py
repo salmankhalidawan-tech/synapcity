@@ -1,6 +1,7 @@
 """
 The full 6-agent framework: Zone Agent (SAC) + SafetyGateWrapper (with Auditor)
-+ Negotiator + Orchestrator + Federated Coordinator.
+
+- Negotiator + Orchestrator + Federated Coordinator.
 """
 
 import os
@@ -19,6 +20,7 @@ from synapcity.federated_coordinator import FederatedCoordinatorAgent
 
 
 class NegotiatedSAC(ShieldAwareUpdateMixin, SAC):
+
     def __init__(
         self,
         env,
@@ -132,6 +134,32 @@ def main():
         ),
     )
 
+    # ---------------------------------------------------------
+    # EPISODE REWARD TRACKING
+    # ---------------------------------------------------------
+
+    episode_reward_log = []
+    _ep_reward_accum = {"value": 0.0}
+
+    _orig_base_step = base_env.step
+
+    def _reward_tracking_step(action):
+        result = _orig_base_step(action)
+
+        reward = result[1]
+
+        r = (
+            float(sum(reward))
+            if isinstance(reward, (list, tuple))
+            else float(reward)
+        )
+
+        _ep_reward_accum["value"] += r
+
+        return result
+
+    base_env.step = _reward_tracking_step
+
     # SafetyGateWrapper internally initializes
     # the Compliance/Auditor Agent
     env = SafetyGateWrapper(
@@ -161,8 +189,12 @@ def main():
         f"on dataset '{config.DATASET_NAME}'..."
     )
 
+    # ---------------------------------------------------------
+    # MANUAL EPISODE LOOP
+    # ---------------------------------------------------------
     # Manual episode loop to trigger Federated Coordinator
     # at the end of each episode
+
     for ep in range(
         1,
         config.EPISODES + 1
@@ -172,9 +204,17 @@ def main():
             and ep == config.EPISODES
         )
 
+        # Reset episode reward accumulator
+        _ep_reward_accum["value"] = 0.0
+
         agent.learn(
             episodes=1,
             deterministic_finish=is_deterministic
+        )
+
+        # Store total reward for this episode
+        episode_reward_log.append(
+            _ep_reward_accum["value"]
         )
 
         # Broadcast the local zone's shield failures
@@ -185,7 +225,10 @@ def main():
             safety_gate=env
         )
 
-    # Evaluate the base environment
+    # ---------------------------------------------------------
+    # EVALUATE BASE ENVIRONMENT
+    # ---------------------------------------------------------
+
     kpis = base_env.evaluate()
 
     out_path = os.path.join(
@@ -225,6 +268,37 @@ def main():
 
     print(
         f"[synapcity] GSI log saved to {gsi_path}"
+    )
+
+    # ---------------------------------------------------------
+    # EPISODE REWARD LOGGING
+    # ---------------------------------------------------------
+
+    reward_path = os.path.join(
+        config.RESULTS_DIR,
+        "synapcity_episode_reward_log.csv"
+    )
+
+    pd.DataFrame(
+        {
+            "episode": range(
+                1,
+                len(episode_reward_log) + 1
+            ),
+            "total_reward": episode_reward_log
+        }
+    ).to_csv(
+        reward_path,
+        index=False
+    )
+
+    print(
+        "[synapcity] Episode reward trend: "
+        f"{[f'{r:.1f}' for r in episode_reward_log]}"
+    )
+
+    print(
+        f"[synapcity] Episode reward log saved to {reward_path}"
     )
 
     print(

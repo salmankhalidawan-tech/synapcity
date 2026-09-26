@@ -53,12 +53,12 @@ NEGOTIATOR_PARAMS = {
 SAC_END_EXPLORATION_TIME_STEP = 310
 SAC_STANDARDIZE_START_TIME_STEP = 260
 
-GRID_STRESS_BASELINE_CARBON = 0.191   # debug-scale median carbon_intensity; recheck at full year
+GRID_STRESS_BASELINE_CARBON = 0.154   # full-year median (8760-step no-control calibration)  # debug-scale median carbon_intensity; recheck at full year
 GRID_STRESS_BASELINE_PRICE = 0.220    # debug-scale median electricity_pricing; recheck at full year
 # ---------------------------------------------------------------------------
 # 4. Training
 # ---------------------------------------------------------------------------
-EPISODES = 5
+EPISODES = 10
 RANDOM_SEED = int(os.environ.get("SYNAPCITY_SEED", "42"))
 RESULTS_DIR = "results"
 
@@ -68,5 +68,5 @@ RESULTS_DIR = "results"
 # When True, caps each episode at a small number of timesteps instead of the
 # full dataset (often a full year / 8760 hourly steps) so you can verify a
 # script runs end-to-end in under a minute. Flip to False for real runs.
-DEBUG_MODE = True
+DEBUG_MODE = False
 DEBUG_SIMULATION_END_TIME_STEP = 400

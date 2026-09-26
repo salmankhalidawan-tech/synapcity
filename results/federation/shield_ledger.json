@@ -2,36 +2,15 @@
     {
         "zone_id": "Zone_1",
         "episode": 1,
-        "unsafe_states_encountered": 234,
-        "total_steps": 400,
-        "rejection_rate": 0.585
+        "unsafe_states_encountered": 6038,
+        "total_steps": 8759,
+        "rejection_rate": 0.6893
     },
     {
         "zone_id": "Zone_1",
         "episode": 2,
-        "unsafe_states_encountered": 234,
-        "total_steps": 400,
-        "rejection_rate": 0.585
-    },
-    {
-        "zone_id": "Zone_1",
-        "episode": 3,
-        "unsafe_states_encountered": 323,
-        "total_steps": 400,
-        "rejection_rate": 0.8075
-    },
-    {
-        "zone_id": "Zone_1",
-        "episode": 4,
-        "unsafe_states_encountered": 160,
-        "total_steps": 400,
-        "rejection_rate": 0.4
-    },
-    {
-        "zone_id": "Zone_1",
-        "episode": 5,
-        "unsafe_states_encountered": 98,
-        "total_steps": 400,
-        "rejection_rate": 0.245
+        "unsafe_states_encountered": 6038,
+        "total_steps": 8759,
+        "rejection_rate": 0.6893
     }
 ]
